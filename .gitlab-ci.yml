@@ -1,0 +1,89 @@
+image:
+  name: registry.ubx.ph/ubx-corp/registry/docker-images/pipeline-container-image
+
+variables:
+  DOCKER_TLS_CERTDIR: ""
+  DOCKER_DRIVER: overlay
+  DOCKER_HOST: tcp://localhost:2375
+
+stages:
+  - test
+  - build
+  - deploy
+
+njsscan:
+  stage: test
+  image: registry.ubx.ph/docker-images/python:3.9-alpine3.14
+  before_script:
+    - pip3 install --upgrade njsscan
+  script:
+    - njsscan .
+  allow_failure: true
+
+build:
+  stage: build
+  services:
+    - registry.ubx.ph/docker-images/docker:18.09.9-dind
+  script:
+    - .gitlab/01_build.sh
+  rules:
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH
+    - if: $CI_MERGE_REQUEST_IID
+
+# static_analysis:
+#   stage: test
+#   dependencies:
+#     - build
+#   services:
+#     - registry.ubx.ph/docker-images/docker:18.09.9-dind
+#   allow_failure: true
+#   script:
+#     - .gitlab/02_test.sh sast
+#   artifacts:
+#     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+#     paths:
+#       - reports/
+#     when: always
+#   rules:
+#     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+#       allow_failure: true
+#     - if: '$CI_COMMIT_REF_NAME == "develop"'
+#       allow_failure: true
+#     - if: '$CI_COMMIT_REF_NAME == "staging"'
+#       allow_failure: false
+#     - if: '$CI_COMMIT_REF_NAME == "master"'
+#       allow_failure: false
+
+deploy:
+  stage: deploy
+  services:
+    - registry.ubx.ph/docker-images/docker:18.09.9-dind
+  script:
+    - .gitlab/02_deploy.sh
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "develop"'
+  environment:
+    name: develop
+
+staging:
+  stage: deploy
+  services:
+    - registry.ubx.ph/docker-images/docker:18.09.9-dind
+  script:
+    - .gitlab/02_deploy.sh
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "staging"'
+  environment:
+    name: staging
+
+production:
+  stage: deploy
+  services:
+    - registry.ubx.ph/docker-images/docker:18.09.9-dind
+  script:
+    - .gitlab/02_deploy.sh
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "production"'
+  environment:
+    name: production
