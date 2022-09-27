@@ -4,7 +4,7 @@ import bytes from 'bytes';
 import { Partitioners } from 'kafkajs';
 
 export default registerAs('kafka', () => ({
-  clientId: process.env.KAFKA_CLIENT_ID || 'orchestrator',
+  clientId: process.env.KAFKA_CLIENT_ID || 'ate',
   brokers: process.env.KAFKA_BROKERS
     ? process.env.KAFKA_BROKERS.split(',')
     : ['localhost:9092'],
@@ -29,7 +29,7 @@ export default registerAs('kafka', () => ({
   producer: {
     createPartitioner: Partitioners.DefaultPartitioner,
     transactionTimeout: ms('60s'),
-    allowTopicCreation: false,
+    allowTopicCreation: true,
     retry: {
       maxRetryTime: ms('30s'),
       initialRetryTime: ms('3s'),
