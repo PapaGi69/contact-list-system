@@ -16,7 +16,7 @@ export default registerAs('kafka', () => ({
     maxBytesPerPartition: bytes('1mb'),
     maxByes: bytes('5mb'),
     maxWaitTimeInMs: ms('5s'),
-    allowAutoTopicCreation: false,
+    allowAutoTopicCreation: true,
     retry: {
       maxRetryTime: ms('30s'),
       initialRetryTime: ms('3s'),
