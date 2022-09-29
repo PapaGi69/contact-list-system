@@ -11,7 +11,7 @@ export default registerAs('app', () => ({
   },
   http: {
     host: process.env.APP_HOST || 'localhost',
-    port: Number.parseInt(process.env.APP_PORT) || 3000,
+    port: Number.parseInt(process.env.APP_PORT) || 3003,
     protocol: process.env.APP_PROTOCOL,
   },
   globalPrefix: '/ate', // If no subdomain is specified, add it
