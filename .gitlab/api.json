@@ -1,0 +1,49 @@
+{
+    "volumes": [],
+    "family": "PROJECT-CHANGEENV-service-ate",
+    "executionRoleArn": "arn:aws:iam::AWSACCOUNT:role/PROJECT-CHANGEENV-ecs-execution-role",
+    "taskRoleArn": "arn:aws:iam::AWSACCOUNT:role/PROJECT-CHANGEENV-ecs-task-role",
+    "memory": "1024",
+    "cpu": "512",
+    "networkMode": "awsvpc",
+    "containerDefinitions": [
+        {
+            "name": "PROJECT-CHANGEENV-service-ate",
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "PROJECT-CHANGEENV-ate",
+                    "awslogs-datetime-format": "%Y-%m-%dT%H:%M:%S%LZ",
+                    "awslogs-region": "AWSREGION",
+                    "awslogs-stream-prefix": "api"
+                }
+            },
+            "portMappings": [
+                {
+                    "hostPort": 3003,
+                    "protocol": "tcp",
+                    "containerPort": 3003
+                }
+            ],
+            "environment": [
+                {
+                    "name": "ALB_HOST",
+                    "value": "alb.CHANGEENV.aws"
+                },
+                {
+                    "name": "Juice_JUNK",
+                    "value": "1234"
+                },
+                {
+                    "name": "PORT",
+                    "value": "3003"
+                }
+            ],
+            "essential": true,
+            "image": "AWSACCOUNT.dkr.ecr.AWSREGION.amazonaws.com/PROJECT-CHANGEENV-ate-api:COMMITTAG",
+            "memory": 512,
+            "cpu": 256,
+            "memoryReservation": 512
+        }
+    ]
+}
