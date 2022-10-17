@@ -18,16 +18,20 @@ export class LoggingInterceptor implements NestInterceptor {
     const req = httpContext.getRequest<Request>();
     const res = httpContext.getResponse<Response>();
 
-    this.logger.log(`[ACCESS] ${req.method} ${req.originalUrl}`);
+    if (req.originalUrl.includes('/ate/health')) {
+      return next.handle();
+    } else {
+      this.logger.log(`[ACCESS] ${req.method} ${req.originalUrl}`);
 
-    return next
-      .handle()
-      .pipe(
-        tap(() =>
-          this.logger.log(
-            `${res.req.method} ${res.req.originalUrl} - Response Code: ${res.statusCode}`,
+      return next
+        .handle()
+        .pipe(
+          tap(() =>
+            this.logger.log(
+              `${res.req.method} ${res.req.originalUrl} - Response Code: ${res.statusCode}`,
+            ),
           ),
-        ),
-      );
+        );
+    }
   }
 }
