@@ -27,7 +27,7 @@ export class BurnService {
     this.chainAddresses = this.configService.get('chain.addresses');
   }
 
-  async burn(fromAddress: string, amount, nonce): Promise<any> {
+  async burn(fromAddress: string, amount: number, nonce: number): Promise<any> {
     const METHOD = '[burn]';
     this.logger.log(`${TAG} ${METHOD}`);
 

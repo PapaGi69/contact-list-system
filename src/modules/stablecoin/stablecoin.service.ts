@@ -6,12 +6,7 @@ import { TransferDto } from '../transfer/dto/transfer.dto';
 import { MintService } from '../mint/mint.service';
 import { BurnService } from '../burn/burn.service';
 import { TransferSevice } from '../transfer/transfer.service';
-import {
-  formatToBalance,
-  getErc20Balance,
-  getErc20EncodedFunctionABI,
-  RawTransactionOptions,
-} from '../../utils/stablecoin.util';
+import { formatToBalance, getErc20Balance } from '../../utils/stablecoin.util';
 import { Web3QuorumService } from '../../providers/web3-quorum';
 import { AWSKMSService } from '../../providers/aws-kms';
 import Web3 from 'web3';
@@ -43,7 +38,7 @@ export class StablecoinService {
     this.web3QuorumClient = this.web3QuorumService.getClient(
       this.configService.get('chain.transactionNode.name'),
     );
-    // For multiple nodes setup, phxContract should be added/deployed for channel's node
+    // For multiple nodes setup, phxContract should be added/deployed on channel's node
     // and maybe we need to store it on another dynamo db table and tied it with channels
     this.chainAddresses = this.configService.get('chain.addresses');
   }
@@ -67,16 +62,13 @@ export class StablecoinService {
     // Increment the current nonce
     await this.updateCurrentTransactionNonce(adminMinterAddress, nonce + 1);
 
-    // Create transaction db entry
-    console.log(mintReceipt);
+    return mintReceipt;
   }
 
   async burn(data: BurnDto): Promise<any> {
     const METHOD = '[burn]';
     this.logger.log(`${TAG} ${METHOD}`);
 
-    // ---- Sign the transaction via AWS KMS Key ID ---- //
-    // Get the ethereum address by kms key id
     const adminBurnerAddress = await this.awsKmsService.getEthAddressByKeyId(
       this.chainAddresses.adminBurner,
     );
@@ -90,52 +82,29 @@ export class StablecoinService {
 
     await this.updateCurrentTransactionNonce(adminBurnerAddress, nonce + 1);
 
-    console.log(burnReceipt);
+    return burnReceipt;
   }
 
   async transfer(data: TransferDto): Promise<any> {
     const METHOD = '[transfer]';
     this.logger.log(`${TAG} ${METHOD}`);
 
-    const transferParameters = [data.fromAddress, data.toAddress, data.amount];
-    const functionEncodedABI = getErc20EncodedFunctionABI(
-      transferParameters,
-      'transferFrom',
-      this.chainAddresses.phxContract,
-      this.web3QuorumClient,
+    const adminTransfererAddress =
+      await this.awsKmsService.getEthAddressByKeyId(
+        this.chainAddresses.adminTransferer,
+      );
+
+    const nonce = await this.getCurrentTransactionNonce(adminTransfererAddress);
+    const transferReceipt = await this.transferService.transfer(
+      data.fromAddress,
+      data.toAddress,
+      data.amount,
+      nonce,
     );
 
-    this.logger.log(
-      `${TAG} ${METHOD} Encoded transfer function with parameters: ${functionEncodedABI}`,
-    );
+    await this.updateCurrentTransactionNonce(adminTransfererAddress, nonce + 1);
 
-    // ---- Onwer of the tokens should allow the admin to transfer their tokens ---- //
-    // ---- Sign the transaction via AWS KMS Key ID ---- //
-    // Get the ethereum address by kms key id
-    const adminMinterAddress = await this.awsKmsService.getEthAddressByKeyId(
-      this.chainAddresses.adminMinter,
-    );
-
-    // Approve the phx contract for token spend here
-
-    const transaction: RawTransactionOptions = {
-      to: this.chainAddresses.phxContract,
-      nonce: await this.web3QuorumClient.eth.getTransactionCount(
-        adminMinterAddress,
-      ),
-      data: functionEncodedABI,
-    };
-
-    const signedTransaction = await this.awsKmsService.signTransaction(
-      transaction,
-      this.chainAddresses.adminMinter,
-    );
-
-    const transactionReceipt =
-      await this.web3QuorumClient.eth.sendSignedTransaction(signedTransaction);
-    console.log('transactionReceipt', transactionReceipt);
-
-    return await this.transferService.transfer(data);
+    return transferReceipt;
   }
 
   async getBalance(data: any): Promise<string> {
@@ -156,7 +125,6 @@ export class StablecoinService {
     this.logger.log(`${TAG} ${METHOD}`);
 
     // Getting the current transaction count of address on contract not on network level
-    // const contractInstance = new this.web3QuorumClient.eth.Contract();
     const cachedNonce = await this.cacheManager.get(`nonce-${address}`);
     if (!cachedNonce) {
       const curretNonce = await this.web3QuorumClient.eth.getTransactionCount(
@@ -183,9 +151,7 @@ export class StablecoinService {
     const METHOD = '[updateCurrentTransactionNonce]';
     this.logger.log(`${TAG} ${METHOD}`);
 
-    this.logger.log(
-      `${TAG} ${METHOD} Updating cached nonce for ${address}: ${nonce}`,
-    );
+    this.logger.log(`${TAG} ${METHOD} Updated nonce for ${address}: ${nonce}`);
 
     await this.cacheManager.set(`nonce-${address}`, nonce);
   }
