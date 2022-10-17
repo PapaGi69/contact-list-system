@@ -1,7 +1,8 @@
 import { ModuleMetadata } from '@nestjs/common';
 
 export interface Web3QuorumModuleOptions {
-  name?: string;
+  name?: string; // Can set the node details via channel name
+  key?: string; // Can set the node details via channel uuid
   url: string;
   privateUrl: string;
 }

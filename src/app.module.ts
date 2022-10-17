@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
 import kafkaConfig from './config/kafka.config';
-import transactionNodeServiceConfig from './config/transaction-node.service.config';
+import chainConfig from './config/chain.config';
+import kmsConfig from './config/kms.config';
 import { TypeOrmConfigService } from './database/typeorm-config.service';
 import { HealthModule } from './modules/health/health.module';
 import { BurnModule } from './modules/burn/burn.module';
@@ -13,12 +14,13 @@ import { MintModule } from './modules/mint/mint.module';
 import { Web3QuorumModule } from './providers/web3-quorum';
 import { TransferModule } from './modules/transfer/transfer.module';
 import { StablecoinModule } from './modules/stablecoin/stablecoin.module';
+import { AWSKMSModule } from './providers/aws-kms';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfig, appConfig, kafkaConfig, transactionNodeServiceConfig],
+      load: [databaseConfig, appConfig, kafkaConfig, chainConfig, kmsConfig],
       envFilePath: ['.env'],
     }),
     TypeOrmModule.forRootAsync({
@@ -28,10 +30,17 @@ import { StablecoinModule } from './modules/stablecoin/stablecoin.module';
         return dataSource;
       },
     }),
-    Web3QuorumModule.forRoot({
-      name: '',
-      url: '',
-      privateUrl: '',
+    // Should load all channel tables or dynamo db table
+    // with channel id/name tied to a quorum node urls
+    Web3QuorumModule.forRootAsync({
+      useFactory: (configService: ConfigService) =>
+        configService.get('chain.transactionNode'),
+      inject: [ConfigService],
+    }),
+    // Separate AWS KMS Credentials
+    AWSKMSModule.forRootAsync({
+      useFactory: (configService: ConfigService) => configService.get('kms'),
+      inject: [ConfigService],
     }),
     HealthModule,
     MintModule,

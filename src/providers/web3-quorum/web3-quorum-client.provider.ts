@@ -21,6 +21,7 @@ export const getClient = async (
   options: Web3QuorumModuleOptions,
 ): Promise<Web3> => {
   const { url, privateUrl } = options;
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   // ipcPath and tlsSettings are not configured here
   // TODO: Implementing the security protocol

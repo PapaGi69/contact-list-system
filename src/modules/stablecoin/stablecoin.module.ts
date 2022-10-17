@@ -1,17 +1,20 @@
-import { Module } from '@nestjs/common';
-import { BurnService } from '../burn/burn.service';
-import { MintService } from '../mint/mint.service';
-import { TransferSevice } from '../transfer/transfer.service';
+import { CacheModule, Module } from '@nestjs/common';
+import { BurnModule } from '../burn/burn.module';
+import { MintModule } from '../mint/mint.module';
+import { TransferModule } from '../transfer/transfer.module';
 import { StablecoinController } from './stablecoin.controller';
 import { StablecoinService } from './stablecoin.service';
 
 @Module({
-  controllers: [StablecoinController],
-  providers: [
-    StablecoinService,
-    MintService,
-    BurnService,
-    TransferSevice
+  imports: [
+    MintModule,
+    BurnModule,
+    TransferModule,
+    CacheModule.registerAsync({
+      useFactory: () => ({ ttl: 0, isGlobal: true }),
+    }),
   ],
+  controllers: [StablecoinController],
+  providers: [StablecoinService],
 })
 export class StablecoinModule {}
