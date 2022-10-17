@@ -6,7 +6,10 @@ import { TransferDto } from '../transfer/dto/transfer.dto';
 import { MintService } from '../mint/mint.service';
 import { BurnService } from '../burn/burn.service';
 import { TransferSevice } from '../transfer/transfer.service';
-import { formatToBalance, getErc20Balance } from '../../utils/stablecoin.util';
+import {
+  formatFromBalance,
+  getErc20Balance,
+} from '../../utils/stablecoin.util';
 import { Web3QuorumService } from '../../providers/web3-quorum';
 import { AWSKMSService } from '../../providers/aws-kms';
 import Web3 from 'web3';
@@ -117,7 +120,7 @@ export class StablecoinService {
       this.web3QuorumClient,
     );
 
-    return formatToBalance(balance, PHX_DECIMALS);
+    return formatFromBalance(balance, PHX_DECIMALS);
   }
 
   async getCurrentTransactionNonce(address: string): Promise<number> {
