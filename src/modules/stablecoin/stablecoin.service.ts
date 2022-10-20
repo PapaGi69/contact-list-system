@@ -1,3 +1,4 @@
+import { getErc20TotalSupply } from './../../utils/stablecoin.util';
 import { Logger, Injectable, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MintDto } from '../mint/dto/mint.dto';
@@ -157,5 +158,16 @@ export class StablecoinService {
     this.logger.log(`${TAG} ${METHOD} Updated nonce for ${address}: ${nonce}`);
 
     await this.cacheManager.set(`nonce-${address}`, nonce);
+  }
+
+  async getTotalSupply(): Promise<string> {
+    const METHOD = '[getTotalSupply]';
+    this.logger.log(`${TAG} ${METHOD}`);
+
+    const totalSupply = await getErc20TotalSupply(
+      this.chainAddresses.phxContract,
+      this.web3QuorumClient,
+    );
+    return formatFromBalance(totalSupply, PHX_DECIMALS);
   }
 }

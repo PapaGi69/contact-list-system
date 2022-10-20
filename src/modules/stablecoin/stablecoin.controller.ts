@@ -1,4 +1,4 @@
-import { Controller, Logger } from '@nestjs/common';
+import { Controller, Get, Logger } from '@nestjs/common';
 import {
   Ctx,
   KafkaContext,
@@ -66,5 +66,17 @@ export class StablecoinController {
       `${TAG} ${METHOD} Incoming data from ${context.getTopic()}`,
     );
     return await this.stablecoinService.getBalance(data);
+  }
+
+  @MessagePattern('stablecoin.totalsupply')
+  async handleGetStablecoinTotalSupply(
+    @Ctx() context: KafkaContext,
+  ): Promise<any> {
+    const METHOD = '[handleGetStablecoinTotalSupply]';
+    this.logger.log(`${TAG} ${METHOD}`);
+    this.logger.log(
+      `${TAG} ${METHOD} Incoming data from ${context.getTopic()}`,
+    );
+    return await this.stablecoinService.getTotalSupply();
   }
 }

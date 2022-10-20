@@ -15,6 +15,11 @@ export const getErc20Balance = async (
   // @ts-ignore
 ): Promise<string> => ERC20(token, provider).methods.balanceOf(address).call();
 
+export const getErc20TotalSupply = async (
+  token: string,
+  provider: Web3,
+): Promise<string> => ERC20(token, provider).methods.totalSupply().call();
+
 export const getErc20EncodedFunctionABI = (
   args: any,
   methodName: string,
