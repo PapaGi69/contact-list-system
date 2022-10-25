@@ -122,6 +122,6 @@ export class AWSKMSService {
       s: `0x${_signature.s.toString('hex')}`,
     });
 
-    return signature; // Can be slit to check the correct signer address
+    return signature; // Can be split to r, s and v for contract level signature verification
   }
 }
