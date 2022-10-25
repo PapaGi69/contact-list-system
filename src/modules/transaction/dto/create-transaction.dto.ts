@@ -8,6 +8,7 @@ export class CreateTransactionDto {
   amount: number;
   type: TransactionType;
   status: TransactionStatus;
+  transactionHash: string;
   ownerId: string;
   channelId: string;
   webhookURL: string;

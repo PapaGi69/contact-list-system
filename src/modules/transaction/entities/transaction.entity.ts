@@ -32,6 +32,9 @@ export class Transaction {
   status: string;
 
   @Column()
+  transactionHash: string;
+
+  @Column()
   ownerId: string;
 
   @Column({ type: 'uuid' })
