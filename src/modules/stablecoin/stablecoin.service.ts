@@ -8,16 +8,20 @@ import { BurnService } from '../burn/burn.service';
 import { TransferSevice } from '../transfer/transfer.service';
 import {
   formatFromBalance,
+  formatToBalance,
   getErc20Balance,
 } from '../../utils/stablecoin.util';
 import { Web3QuorumService } from '../../providers/web3-quorum';
 import { AWSKMSService } from '../../providers/aws-kms';
 import Web3 from 'web3';
 import { Cache } from 'cache-manager';
+import { TransactionService } from '../transaction/transaction.service';
+import { TransactionType } from '../transaction/enum/transaction-type.enum';
+import { TransactionStatus } from '../transaction/enum/transaction-status.enum';
 
 const TAG = '[StablecoinService]';
 
-const PHX_DECIMALS = 18;
+const PHX_DECIMALS = 18; // Should be added in contract storage
 
 @Injectable()
 export class StablecoinService {
@@ -33,6 +37,7 @@ export class StablecoinService {
     private readonly mintService: MintService,
     private readonly burnService: BurnService,
     private readonly transferService: TransferSevice,
+    private readonly transactionService: TransactionService,
   ) {
     // transaction node url should be tied to a channel.
     // in maw-bebs, channel has a corresponding
@@ -55,15 +60,23 @@ export class StablecoinService {
       this.chainAddresses.adminMinter,
     );
 
-    const nonce = await this.getCurrentTransactionNonce(adminMinterAddress);
     const mintReceipt = await this.mintService.mint(
       data.toAddress,
-      data.amount,
-      nonce,
+      formatToBalance(data.amount.toString(), PHX_DECIMALS),
+      await this.getCurrentTransactionNonce(adminMinterAddress),
     );
 
-    // Increment the current nonce
-    await this.updateCurrentTransactionNonce(adminMinterAddress, nonce + 1);
+    await this.transactionService.createTransaction({
+      requestId: data.requestId,
+      to: data.toAddress,
+      amount: data.amount,
+      type: TransactionType.MINT,
+      status: TransactionStatus.PROCESSING,
+      ownerId: data.ownerId,
+      channelId: data.channelId,
+      webhookURL: data.webhookURL,
+      createdAt: data.createdAt,
+    });
 
     return mintReceipt;
   }
@@ -75,15 +88,23 @@ export class StablecoinService {
     const adminBurnerAddress = await this.awsKmsService.getEthAddressByKeyId(
       this.chainAddresses.adminBurner,
     );
-
-    const nonce = await this.getCurrentTransactionNonce(adminBurnerAddress);
     const burnReceipt = await this.burnService.burn(
       data.fromAddress,
-      data.amount,
-      nonce,
+      formatToBalance(data.amount.toString(), PHX_DECIMALS),
+      await this.getCurrentTransactionNonce(adminBurnerAddress),
     );
 
-    await this.updateCurrentTransactionNonce(adminBurnerAddress, nonce + 1);
+    await this.transactionService.createTransaction({
+      requestId: data.requestId,
+      from: data.fromAddress,
+      amount: data.amount,
+      type: TransactionType.BURN,
+      status: TransactionStatus.PROCESSING,
+      ownerId: data.ownerId,
+      channelId: data.channelId,
+      webhookURL: data.webhookURL,
+      createdAt: data.createdAt,
+    });
 
     return burnReceipt;
   }
@@ -92,20 +113,25 @@ export class StablecoinService {
     const METHOD = '[transfer]';
     this.logger.log(`${TAG} ${METHOD}`);
 
-    const adminTransfererAddress =
-      await this.awsKmsService.getEthAddressByKeyId(
-        this.chainAddresses.adminTransferer,
-      );
-
-    const nonce = await this.getCurrentTransactionNonce(adminTransfererAddress);
     const transferReceipt = await this.transferService.transfer(
-      data.fromAddress,
       data.toAddress,
-      data.amount,
-      nonce,
+      formatToBalance(data.amount.toString(), PHX_DECIMALS),
+      await this.getCurrentTransactionNonce(data.fromAddress),
+      data.keyId,
     );
 
-    await this.updateCurrentTransactionNonce(adminTransfererAddress, nonce + 1);
+    await this.transactionService.createTransaction({
+      requestId: data.requestId,
+      from: data.fromAddress,
+      to: data.toAddress,
+      amount: data.amount,
+      type: TransactionType.TRANSFER,
+      status: TransactionStatus.PROCESSING,
+      ownerId: data.ownerId,
+      channelId: data.channelId,
+      webhookURL: data.webhookURL,
+      createdAt: data.createdAt,
+    });
 
     return transferReceipt;
   }
@@ -128,23 +154,24 @@ export class StablecoinService {
     this.logger.log(`${TAG} ${METHOD}`);
 
     // Getting the current transaction count of address on contract not on network level
-    const cachedNonce = await this.cacheManager.get(`nonce-${address}`);
-    if (!cachedNonce) {
-      const curretNonce = await this.web3QuorumClient.eth.getTransactionCount(
-        address,
-      );
-      this.logger.log(
-        `${TAG} ${METHOD} Nonce for ${address} not found. Setting to updated nonce value: ${curretNonce}`,
-      );
-      await this.cacheManager.set(`nonce-${address}`, curretNonce);
-      return curretNonce;
-    }
+    // const cachedNonce = await this.cacheManager.get(`nonce-${address}`);
+    // if (!cachedNonce) {
+    //   const curretNonce = await this.web3QuorumClient.eth.getTransactionCount(
+    //     address,
+    //   );
+    //   this.logger.log(
+    //     `${TAG} ${METHOD} Nonce for ${address} not found. Setting to updated nonce value: ${curretNonce}`,
+    //   );
+    //   await this.cacheManager.set(`nonce-${address}`, curretNonce);
+    //   return curretNonce;
+    // }
 
-    this.logger.log(
-      `${TAG} ${METHOD} Using cached/updated nonce for ${address}: ${cachedNonce}`,
-    );
+    // this.logger.log(
+    //   `${TAG} ${METHOD} Using cached/updated nonce for ${address}: ${cachedNonce}`,
+    // );
 
-    return cachedNonce as number;
+    // return cachedNonce as number;
+    return await this.web3QuorumClient.eth.getTransactionCount(address);
   }
 
   async updateCurrentTransactionNonce(
