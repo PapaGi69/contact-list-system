@@ -27,7 +27,7 @@ export const getErc20EncodedFunctionABI = (
 };
 
 export const formatFromBalance = (value: string, decimals: number): string => {
-  return formatUnits(value, decimals);
+  return formatUnits(value, decimals).toString();
 };
 
 export const formatToBalance = (value: string, decimals: number): string => {
@@ -41,6 +41,9 @@ export interface RawTransactionOptions {
   gasLimit?: number | BigNumber;
   gasPrice?: number | BigNumber;
   data: string;
+  isPrivate?: boolean; // Tag as private transaction between node participants; and web3js-quorum will call the transaction manager to encrypt/decript the data between parties
+  privateFrom?: string; // Sender node's transaction manager public key
+  privateFor?: string[]; // Array of transaction manager nodepublic keys
 }
 
 // Used for signing the transaction via AWS KMS
@@ -58,7 +61,31 @@ export const serializeRawTransaction = (
     gasLimit: options.gasLimit || `0x${GAS_LIMIT.toString(16)}`,
     gasPrice: options.gasPrice || `0x${GAS_PRICE.toString(16)}`,
     data: options.data,
+    // isPrivate: options.isPrivate,
+    // privateFrom: options.privateFrom,
+    // privateFor: options.privateFor,
   };
 
+  if (options.isPrivate) {
+    rawTransaction['isPrivate'] = options.isPrivate;
+    rawTransaction['privateFrom'] = options.privateFrom;
+    rawTransaction['privateFor'] = options.privateFor;
+  }
+
   return serializeTransaction(rawTransaction);
+};
+
+// Should be on a shared module? Or utils for sdk maybe
+export const buildEip712Domain = (
+  name: string,
+  version: string,
+  chainId: number,
+  verifyingContract: string,
+) => {
+  return {
+    name,
+    version,
+    chainId,
+    verifyingContract,
+  };
 };
