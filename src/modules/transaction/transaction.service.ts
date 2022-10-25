@@ -49,5 +49,8 @@ export class TransactionService {
     // update transaction status to SUCCESS
     transaction.status = 'SUCCESS';
     await this.transactionRepository.save(transaction);
+
+    // TODO
+    // call webhook url to update other service on the transaction
   }
 }

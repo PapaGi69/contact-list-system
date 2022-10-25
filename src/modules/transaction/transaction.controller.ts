@@ -17,7 +17,7 @@ export class TransactionController {
 
   constructor(private transactionService: TransactionService) {}
 
-  @MessagePattern('transaction_created')
+  @MessagePattern('chain.emitted.event')
   async handleTransactionCreatedEvent(
     @Payload() data: TransactionCreatedEvent,
     @Ctx() context: KafkaContext,
