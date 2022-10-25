@@ -15,6 +15,7 @@ import { Web3QuorumModule } from './providers/web3-quorum';
 import { TransferModule } from './modules/transfer/transfer.module';
 import { StablecoinModule } from './modules/stablecoin/stablecoin.module';
 import { AWSKMSModule } from './providers/aws-kms';
+import { TransactionModule } from './modules/transaction/transaction.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { AWSKMSModule } from './providers/aws-kms';
     BurnModule,
     TransferModule,
     StablecoinModule,
+    TransactionModule,
   ],
 })
 export class AppModule {}

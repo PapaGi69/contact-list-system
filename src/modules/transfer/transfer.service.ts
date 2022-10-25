@@ -8,7 +8,7 @@ import {
   RawTransactionOptions,
 } from '../../utils/stablecoin.util';
 
-const TAG = '[MintService]';
+const TAG = '[TransferSevice]';
 
 @Injectable()
 export class TransferSevice {
@@ -28,37 +28,32 @@ export class TransferSevice {
   }
 
   async transfer(
-    fromAddress: string,
     toAddress: string,
-    amount: number,
+    amount: string,
     nonce: number,
+    keyId: string,
   ): Promise<any> {
     const METHOD = '[transfer]';
     this.logger.log(`${TAG} ${METHOD}`);
 
-    const transferParameters = [
-      fromAddress,
-      toAddress,
-      this.web3QuorumClient.utils.toWei(amount.toString()),
-    ];
-    const functionEncodedABI = getErc20EncodedFunctionABI(
+    // const transferParameters = [fromAddress, toAddress, amount];
+    const transferParameters = [toAddress, amount];
+    const transferFunctionEncodedABI = getErc20EncodedFunctionABI(
       transferParameters,
-      'transferFrom', // Can be change depending on the custom transfer implementation
+      'transfer', // Can be change depending on the custom transfer implementation
       this.chainAddresses.phxContract,
       this.web3QuorumClient,
     );
 
-    // Approve the phx contract for token spending here
-
     const transaction: RawTransactionOptions = {
       to: this.chainAddresses.phxContract,
       nonce,
-      data: functionEncodedABI,
+      data: transferFunctionEncodedABI,
     };
 
     const signedTransaction = await this.awsKmsService.signTransaction(
       transaction,
-      this.chainAddresses.adminTransferer,
+      keyId,
     );
 
     const transactionReceipt =
