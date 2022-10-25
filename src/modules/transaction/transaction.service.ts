@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Transaction } from './entities/transaction.entity';
 import { Repository } from 'typeorm';
@@ -29,6 +24,37 @@ export class TransactionService {
     return await this.transactionRepository.save(data);
   }
 
+  async getTransactionByRequestId(
+    channelId: string,
+    requestId: string,
+  ): Promise<any> {
+    const METHOD = '[getTransactionByRequestId]';
+    this.logger.log(`${TAG} ${METHOD}`);
+
+    const transaction = await this.transactionRepository.findOne({
+      where: {
+        channelId,
+        requestId,
+      },
+      select: {
+        requestId: true,
+        from: true,
+        to: true,
+        amount: true,
+        type: true,
+        status: true,
+        transactionHash: true,
+        ownerId: true,
+        channelId: true,
+        webhookURL: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return { ...transaction };
+  }
+
   async handleTransactionCreatedEvent(data: TransactionCreatedEvent) {
     const METHOD = '[handleTransactionCreatedEvent]';
     this.logger.log(`${TAG} ${METHOD}`);
@@ -52,5 +78,9 @@ export class TransactionService {
 
     // TODO
     // call webhook url to update other service on the transaction
+    //
+    // - FR: Oliver
+    // Ignore error response from the webhook url
+    // Add retry logic for failed webhook calls
   }
 }
