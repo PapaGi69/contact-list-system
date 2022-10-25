@@ -9,6 +9,7 @@ import { BurnService } from '../burn/burn.service';
 import { TransferSevice } from '../transfer/transfer.service';
 import {
   formatFromBalance,
+  formatToBalance,
   getErc20Balance,
 } from '../../utils/stablecoin.util';
 import { Web3QuorumService } from '../../providers/web3-quorum';
@@ -168,6 +169,6 @@ export class StablecoinService {
       this.chainAddresses.phxContract,
       this.web3QuorumClient,
     );
-    return formatFromBalance(totalSupply, PHX_DECIMALS);
+    return formatToBalance(totalSupply, PHX_DECIMALS);
   }
 }
