@@ -198,6 +198,6 @@ export class StablecoinService {
       this.chainAddresses.phxContract,
       this.web3QuorumClient,
     );
-    return formatToBalance(totalSupply, PHX_DECIMALS);
+    return formatFromBalance(totalSupply, PHX_DECIMALS);
   }
 }
