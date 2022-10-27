@@ -25,8 +25,13 @@ if [[ "$CI_COMMIT_REF_NAME" == fea* ]]; then
     export ENVVAR=$(aws ssm get-parameters --region ${AWS_DEFAULT_REGION} --with-decryption --names "/envvar/${PROJECT_NAME}/${ENVIRONMENT}/ate" | jq -r '.Parameters[]  | .Value')
     echo "$ENVVAR" > .env
 
+    echo $AWS_DEFAULT_REGION
+    echo $AWS_ACCOUNT_ID
+
     #Docker Login
+    echo "Login to UBX registry..."
     docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.ubx.ph
+    echo "Login to AWS ECR..."
     aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
 
 
