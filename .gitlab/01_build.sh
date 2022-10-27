@@ -5,8 +5,7 @@ export DOCKER_API_VERSION=1.39
 ## Extract Environment specific variables
 echo "Exporting Variables..."
 
-if [ $CI_COMMIT_REF_NAME == fea* ]
-then
+if [ $CI_COMMIT_REF_NAME == fea* ]; then
     export PROJECT_NAME=`jq --arg branch $CI_COMMIT_REF_NAME -r '.general | .project_name' $ENVVAR_SOURCE_FILE`
     export VENTURE_NAME=`jq --arg branch $CI_COMMIT_REF_NAME -r '.general | .venture_name' $ENVVAR_SOURCE_FILE`
     export DOMAIN_NAME=`jq --arg branch $CI_COMMIT_REF_NAME -r '.general | .domain_name' $ENVVAR_SOURCE_FILE`
@@ -22,9 +21,7 @@ then
     export AWS_ACCOUNT_ID=`jq --arg branch $CI_COMMIT_REF_NAME -r '.environment[] | select(.commitBranch=="dev") | .awsAccountId' $ENVVAR_SOURCE_FILE`
     export ENVPAR=`jq --arg branch $CI_COMMIT_REF_NAME -r '.environment[] | select(.commitBranch=="dev" | .envparamater' $ENVVAR_SOURCE_FILE`
     export DOCKERFILE=`jq --arg branch $CI_COMMIT_REF_NAME -r '.environment[] | select(.commitBranch=="dev") | .dockerfile' $ENVVAR_SOURCE_FILE`
-
 else
-
     export PROJECT_NAME=`jq --arg branch $CI_COMMIT_REF_NAME -r '.general | .project_name' $ENVVAR_SOURCE_FILE`
     export VENTURE_NAME=`jq --arg branch $CI_COMMIT_REF_NAME -r '.general | .venture_name' $ENVVAR_SOURCE_FILE`
     export DOMAIN_NAME=`jq --arg branch $CI_COMMIT_REF_NAME -r '.general | .domain_name' $ENVVAR_SOURCE_FILE`
