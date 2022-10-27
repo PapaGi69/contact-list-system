@@ -12,15 +12,15 @@ if [[ "$CI_COMMIT_REF_NAME" == fea* ]]; then
     export TERRAFORM_TOKEN=`jq --arg branch $CI_COMMIT_REF_NAME -r '.general | .terraform' $ENVVAR_SOURCE_FILE`
     export UBX_ID=`jq --arg branch $CI_COMMIT_REF_NAME -r '.ubxph | .ubx_id' $ENVVAR_SOURCE_FILE`
     export UBX_SECRET=`jq --arg branch $CI_COMMIT_REF_NAME -r '.ubxph | .ubx_secret' $ENVVAR_SOURCE_FILE`
-    export AWS_ACCESS_KEY_ID=`jq --arg branch $CI_COMMIT_REF_NAME -r '.environment[] | select(.commitBranch=="dev") | .accessKeyId' $ENVVAR_SOURCE_FILE`
-    export AWS_SECRET_ACCESS_KEY=`jq --arg branch $CI_COMMIT_REF_NAME -r '.environment[] | select(.commitBranch=="dev") | .accessKeySecret' $ENVVAR_SOURCE_FILE`
-    export AWS_DEFAULT_REGION=`jq --arg branch $CI_COMMIT_REF_NAME -r '.environment[] | select(.commitBranch=="dev") | .awsDefaultRegion' $ENVVAR_SOURCE_FILE`
-    export CHANGEKEY=`jq --arg branch $CI_COMMIT_REF_NAME -r '.environment[] | select(.commitBranch=="dev") | .changekey' $ENVVAR_SOURCE_FILE`
-    export ENVIRONMENT=`jq --arg branch $CI_COMMIT_REF_NAME -r '.environment[] | select(.commitBranch=="dev") | .environment' $ENVVAR_SOURCE_FILE`
-    export RDS_PASSWORD=`jq --arg branch $CI_COMMIT_REF_NAME -r '.environment[] | select(.commitBranch=="dev") | .dbPassword' $ENVVAR_SOURCE_FILE`
-    export AWS_ACCOUNT_ID=`jq --arg branch $CI_COMMIT_REF_NAME -r '.environment[] | select(.commitBranch=="dev") | .awsAccountId' $ENVVAR_SOURCE_FILE`
-    export ENVPAR=`jq --arg branch $CI_COMMIT_REF_NAME -r '.environment[] | select(.commitBranch=="dev" | .envparamater' $ENVVAR_SOURCE_FILE`
-    export DOCKERFILE=`jq --arg branch $CI_COMMIT_REF_NAME -r '.environment[] | select(.commitBranch=="dev") | .dockerfile' $ENVVAR_SOURCE_FILE`
+    export AWS_ACCESS_KEY_ID=`jq --arg branch $CI_COMMIT_REF_NAME -r '.environment[] | .dev | .accessKeyId' $ENVVAR_SOURCE_FILE`
+    export AWS_SECRET_ACCESS_KEY=`jq --arg branch $CI_COMMIT_REF_NAME -r '.environment[] | .dev | .accessKeySecret' $ENVVAR_SOURCE_FILE`
+    export AWS_DEFAULT_REGION=`jq --arg branch $CI_COMMIT_REF_NAME -r '.environment[] | .dev | .awsDefaultRegion' $ENVVAR_SOURCE_FILE`
+    export CHANGEKEY=`jq --arg branch $CI_COMMIT_REF_NAME -r '.environment[] | .dev | .changekey' $ENVVAR_SOURCE_FILE`
+    export ENVIRONMENT=`jq --arg branch $CI_COMMIT_REF_NAME -r '.environment[] | .dev | .environment' $ENVVAR_SOURCE_FILE`
+    export RDS_PASSWORD=`jq --arg branch $CI_COMMIT_REF_NAME -r '.environment[] | .dev | .dbPassword' $ENVVAR_SOURCE_FILE`
+    export AWS_ACCOUNT_ID=`jq --arg branch $CI_COMMIT_REF_NAME -r '.environment[] | .dev | .awsAccountId' $ENVVAR_SOURCE_FILE`
+    export ENVPAR=`jq --arg branch $CI_COMMIT_REF_NAME -r '.environment[] | .dev | .envparamater' $ENVVAR_SOURCE_FILE`
+    export DOCKERFILE=`jq --arg branch $CI_COMMIT_REF_NAME -r '.environment[] | .dev | .dockerfile' $ENVVAR_SOURCE_FILE`
 else
     export PROJECT_NAME=`jq --arg branch $CI_COMMIT_REF_NAME -r '.general | .project_name' $ENVVAR_SOURCE_FILE`
     export VENTURE_NAME=`jq --arg branch $CI_COMMIT_REF_NAME -r '.general | .venture_name' $ENVVAR_SOURCE_FILE`
