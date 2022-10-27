@@ -21,6 +21,22 @@ if [[ "$CI_COMMIT_REF_NAME" == fea* ]]; then
     export AWS_ACCOUNT_ID=`jq --arg branch $CI_COMMIT_REF_NAME -r '.environment[] | .dev | .awsAccountId' $ENVVAR_SOURCE_FILE`
     export ENVPAR=`jq --arg branch $CI_COMMIT_REF_NAME -r '.environment[] | .dev | .envparamater' $ENVVAR_SOURCE_FILE`
     export DOCKERFILE=`jq --arg branch $CI_COMMIT_REF_NAME -r '.environment[] | .dev | .dockerfile' $ENVVAR_SOURCE_FILE`
+
+    export ENVVAR=$(aws ssm get-parameters --region ${AWS_DEFAULT_REGION} --with-decryption --names "/envvar/${PROJECT_NAME}/${ENVIRONMENT}/ate" | jq -r '.Parameters[]  | .Value')
+    echo "$ENVVAR" > .env
+
+    #Docker Login
+    docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.ubx.ph
+    aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
+
+
+    cp .gitlab/Dockerfile ./Dockerfile
+    docker build -t ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT_NAME}-${ENVIRONMENT}-ate-api:${CI_COMMIT_SHA:0:8} -f ./Dockerfile .
+    docker tag ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT_NAME}-${ENVIRONMENT}-ate-api:${CI_COMMIT_SHA:0:8} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT_NAME}-${ENVIRONMENT}-ate-api:develop
+
+
+    docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT_NAME}-${ENVIRONMENT}-ate-api:${CI_COMMIT_SHA:0:8}
+    docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT_NAME}-${ENVIRONMENT}-ate-api:develop
 else
     export PROJECT_NAME=`jq --arg branch $CI_COMMIT_REF_NAME -r '.general | .project_name' $ENVVAR_SOURCE_FILE`
     export VENTURE_NAME=`jq --arg branch $CI_COMMIT_REF_NAME -r '.general | .venture_name' $ENVVAR_SOURCE_FILE`
@@ -37,21 +53,22 @@ else
     export AWS_ACCOUNT_ID=`jq --arg branch $CI_COMMIT_REF_NAME -r '.environment[] | select(.commitBranch==$branch) | .awsAccountId' $ENVVAR_SOURCE_FILE`
     export ENVPAR=`jq --arg branch $CI_COMMIT_REF_NAME -r '.environment[] | select(.commitBranch==$branch) | .envparamater' $ENVVAR_SOURCE_FILE`
     export DOCKERFILE=`jq --arg branch $CI_COMMIT_REF_NAME -r '.environment[] | select(.commitBranch==$branch) | .dockerfile' $ENVVAR_SOURCE_FILE`
+
+    export ENVVAR=$(aws ssm get-parameters --region ${AWS_DEFAULT_REGION} --with-decryption --names "/envvar/${PROJECT_NAME}/${ENVIRONMENT}/ate" | jq -r '.Parameters[]  | .Value')
+    echo "$ENVVAR" > .env
+
+    #Docker Login
+    docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.ubx.ph
+    aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
+
+
+    cp .gitlab/Dockerfile ./Dockerfile
+    docker build -t ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT_NAME}-${ENVIRONMENT}-ate-api:${CI_COMMIT_SHA:0:8} -f ./Dockerfile .
+    docker tag ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT_NAME}-${ENVIRONMENT}-ate-api:${CI_COMMIT_SHA:0:8} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT_NAME}-${ENVIRONMENT}-ate-api:develop
+
+
+    docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT_NAME}-${ENVIRONMENT}-ate-api:${CI_COMMIT_SHA:0:8}
+    docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT_NAME}-${ENVIRONMENT}-ate-api:develop
 fi
 
-export ENVVAR=$(aws ssm get-parameters --region ${AWS_DEFAULT_REGION} --with-decryption --names "/envvar/${PROJECT_NAME}/${ENVIRONMENT}/ate" | jq -r '.Parameters[]  | .Value')
-echo "$ENVVAR" > .env
-
-#Docker Login
-docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.ubx.ph
-aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
-
-
-cp .gitlab/Dockerfile ./Dockerfile
-docker build -t ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT_NAME}-${ENVIRONMENT}-ate-api:${CI_COMMIT_SHA:0:8} -f ./Dockerfile .
-docker tag ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT_NAME}-${ENVIRONMENT}-ate-api:${CI_COMMIT_SHA:0:8} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT_NAME}-${ENVIRONMENT}-ate-api:develop
-
-
-docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT_NAME}-${ENVIRONMENT}-ate-api:${CI_COMMIT_SHA:0:8}
-docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT_NAME}-${ENVIRONMENT}-ate-api:develop
 #docker push registry.ubx.ph/$CI_PROJECT_PATH/backend-api:${CI_COMMIT_SHA:0:8}
