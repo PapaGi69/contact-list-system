@@ -7,21 +7,24 @@ import databaseConfig from './config/database.config';
 import kafkaConfig from './config/kafka.config';
 import chainConfig from './config/chain.config';
 import kmsConfig from './config/kms.config';
+import ethersChainConfig from './config/ethers-chain.config';
 import { TypeOrmConfigService } from './database/typeorm-config.service';
 import { HealthModule } from './modules/health/health.module';
 import { BurnModule } from './modules/burn/burn.module';
 import { MintModule } from './modules/mint/mint.module';
-import { Web3QuorumModule } from './providers/web3-quorum';
 import { TransferModule } from './modules/transfer/transfer.module';
 import { StablecoinModule } from './modules/stablecoin/stablecoin.module';
-import { AWSKMSModule } from './providers/aws-kms';
 import { TransactionModule } from './modules/transaction/transaction.module';
+
+import { Web3QuorumModule } from './providers/web3-quorum';
+import { AWSKMSModule } from './providers/aws-kms';
+import { Web3EthersModule } from './providers/web3-ethers';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfig, appConfig, kafkaConfig, chainConfig, kmsConfig],
+      load: [databaseConfig, appConfig, kafkaConfig, chainConfig, kmsConfig, ethersChainConfig],
       envFilePath: ['.env'],
     }),
     TypeOrmModule.forRootAsync({
@@ -43,6 +46,7 @@ import { TransactionModule } from './modules/transaction/transaction.module';
       useFactory: (configService: ConfigService) => configService.get('kms'),
       inject: [ConfigService],
     }),
+    Web3EthersModule,
     HealthModule,
     MintModule,
     BurnModule,
