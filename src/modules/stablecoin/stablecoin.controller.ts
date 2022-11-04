@@ -67,4 +67,16 @@ export class StablecoinController {
     );
     return await this.stablecoinService.getBalance(data);
   }
+
+  @MessagePattern('stablecoin.totalsupply')
+  async handleGetStablecoinTotalSupply(
+    @Ctx() context: KafkaContext,
+  ): Promise<any> {
+    const METHOD = '[handleGetStablecoinTotalSupply]';
+    this.logger.log(`${TAG} ${METHOD}`);
+    this.logger.log(
+      `${TAG} ${METHOD} Incoming data from ${context.getTopic()}`,
+    );
+    return await this.stablecoinService.getTotalSupply();
+  }
 }
