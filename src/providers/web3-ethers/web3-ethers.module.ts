@@ -20,7 +20,6 @@ import { Web3EthersService } from './web3-ethers.service';
     }),
   ],
   providers: [Web3EthersService],
-  exports: [Web3EthersService]
+  exports: [Web3EthersService],
 })
-
 export class Web3EthersModule {}
