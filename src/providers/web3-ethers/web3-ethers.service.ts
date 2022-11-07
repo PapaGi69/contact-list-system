@@ -7,7 +7,10 @@ export class Web3EthersService {
     @InjectEthersProvider()
     private readonly ethersProvider: BaseProvider,
   ) {}
-  async getNetwork(): Promise<any> {
-    return this.ethersProvider.getNetwork();
+
+  async sendTransaction(signedTransaction: string): Promise<any> {
+    return this.ethersProvider.sendTransaction(signedTransaction);
   }
+
+  // TODO: POC: nestjs-ethers wallet signers
 }
