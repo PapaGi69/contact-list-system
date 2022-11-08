@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { Web3EthersService } from 'src/providers/web3-ethers';
@@ -8,46 +8,96 @@ import { BuildPermitParamsDto } from './dto/build-permit-params.dto';
 
 import { MintPermitType } from './type/mint-permit.type';
 import { MintPermitResponseType } from './type/mint-permit-response.type';
+import { Wallet } from 'nestjs-ethers';
+import { ethers } from 'ethers';
+
+const TAG = '[ChainService]';
 
 @Injectable()
 export class PermitService {
+  private readonly logger = new Logger(PermitService.name);
+
   constructor(
-    private readonly configModule: ConfigService,
+    private readonly configService: ConfigService,
     private readonly web3EthersService: Web3EthersService,
   ) {}
-  
+
   async requestMintPermit(requestMintPermitDto: RequestMintPermitDto) {
-    const { 
-      buyerAddress, 
-      sellerAddress,
-    } = requestMintPermitDto;
+    const METHOD = '[requestMintPermit]';
+    this.logger.log(`${TAG} ${METHOD}`);
+
+    const { buyerAddress, sellerAddress } = requestMintPermitDto;
 
     // Expiration of the mint permit
     const deadline = Date.now() + 300000;
 
     const buildPermitParamsDto = new BuildPermitParamsDto();
 
-    // TODO: Populate the following via configModule.
-    buildPermitParamsDto.chainId = '';
-    buildPermitParamsDto.contractAddress = '';
-    buildPermitParamsDto.domainName = '';
-    buildPermitParamsDto.revision = '';
+    // BuildPermitParamsDto Config
+    buildPermitParamsDto.chainId = this.configService.get(
+      'ethers-chain.smartContract.rpcProvider',
+    );
+    buildPermitParamsDto.contractAddress = this.configService.get(
+      'ethers-chain.smartContract.smartContractAddress',
+    );
+    buildPermitParamsDto.domainName = this.configService.get(
+      'ethers-chain.smartContract.domainName',
+    );
+    buildPermitParamsDto.revision = this.configService.get(
+      'ethers-chain.smartContract.revision',
+    );
     buildPermitParamsDto.purchaser = buyerAddress;
     buildPermitParamsDto.seller = sellerAddress;
     buildPermitParamsDto.deadline = deadline.toString();
 
-    const permit = this._buildMintPermitParams(buildPermitParamsDto);
+    // Build mint permit
+    const permit = await this.buildMintPermitParams(buildPermitParamsDto);
 
-    // TODO: POC nestjs-ethers wallet signer. 
-    
-    // TODO: Sign using `permit`. Check `Artifract` backend, `ChainService.js` for more details.
+    const wallet: Wallet = await this.web3EthersService.createWallet(
+      this.configService.get('ethers-chain.smartContract.contractDeployer'),
+    );
 
-    // TODO: Populate the following via configModule.
+    try {
+      // Permit signed by the contract deployer
+      const signature = await this.web3EthersService.signTypeData(
+        wallet,
+        permit,
+      );
+
+      // Verify if the signature is from the contract deployer
+      const sign = ethers.utils.verifyTypedData(
+        permit.domain,
+        permit.types,
+        permit.message,
+        signature,
+      );
+
+      this.logger.log(
+        sign ===
+          (await this.configService.get(
+            'ethers-chain.smartContract.deployerPublicKey',
+          )),
+      );
+    } catch (error) {
+      this.logger.error(error);
+    }
+
     this.web3EthersService.sendTransaction('signed');
   }
 
-  private async _buildMintPermitParams(
-    buildPermitParamsDto: BuildPermitParamsDto
+  /**
+   * Build mint permit parameter object
+   * @param {number} chainId
+   * @param {string} contractAddress
+   * @param {string} domainName
+   * @param {string} revision
+   * @param {string} purchaser
+   * @param {number} deadline
+   * @return {object} The mint permit parameter object
+   */
+
+  private async buildMintPermitParams(
+    buildPermitParamsDto: BuildPermitParamsDto,
   ): Promise<MintPermitResponseType> {
     const {
       chainId,
@@ -65,16 +115,15 @@ export class PermitService {
       { name: 'deadline', type: 'uint256' },
     ];
 
-    // TODO: Populate the following via configModule.
     const mintPermitResponse: MintPermitResponseType = {
       types: {
         MintPermit,
       },
       domain: {
-        name: '',
-        version: '',
-        chainId: '',
-        verifyingContract: '',
+        name: domainName,
+        version: revision,
+        chainId: chainId,
+        verifyingContract: contractAddress,
       },
       message: {
         purchaser,
