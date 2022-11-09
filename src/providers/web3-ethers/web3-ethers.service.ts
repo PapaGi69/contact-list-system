@@ -1,12 +1,19 @@
+import {
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Injectable } from '@nestjs/common';
+
 import {
   InjectEthersProvider,
   BaseProvider,
   EthersSigner,
   InjectSignerProvider,
   Wallet,
+  TransactionResponse,
 } from 'nestjs-ethers';
+
+import { MintPermitResponseType } from 'src/modules/permit/type/mint-permit-response.type';
 
 @Injectable()
 export class Web3EthersService {
@@ -18,21 +25,36 @@ export class Web3EthersService {
     private readonly configService: ConfigService,
   ) {}
 
-  async sendTransaction(signedTransaction: string): Promise<any> {
+  private readonly TAG = '[Web3EthersService]';
+  private readonly logger = new Logger(`${this.TAG}`);
+
+  async sendTransaction(signedTransaction: string): Promise<TransactionResponse> {
+    const METHOD = '[sendTransaction]';
+    this.logger.log(`${METHOD}`);
+
     return this.ethersProvider.sendTransaction(signedTransaction);
   }
 
   async createWallet(contractDeployer: string): Promise<Wallet> {
+    const METHOD = '[createWallet]';
+    this.logger.log(`${METHOD}`);
+
     return this.ethersSigner.createWallet(
       this.configService.get(contractDeployer),
     );
   }
 
   async getChainId(wallet: Wallet): Promise<number> {
+    const METHOD = '[getChainId]';
+    this.logger.log(`${METHOD}`);
+
     return wallet.getChainId();
   }
 
-  async signTypeData(wallet: Wallet, permit): Promise<any> {
+  async signTypeData(wallet: Wallet, permit: MintPermitResponseType): Promise<string> {
+    const METHOD = '[signTypeData]';
+    this.logger.log(`${METHOD}`);
+  
     const { domain, types, message } = permit;
     return wallet._signTypedData(domain, types, message);
   }

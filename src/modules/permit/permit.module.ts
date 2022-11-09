@@ -5,4 +5,4 @@ import { PermitService } from './permit.service';
   providers: [PermitService],
   exports: [PermitService],
 })
-export class MintModule {}
+export class PermitModule {}

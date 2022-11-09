@@ -11,20 +11,19 @@ import { MintPermitResponseType } from './type/mint-permit-response.type';
 import { Wallet } from 'nestjs-ethers';
 import { ethers } from 'ethers';
 
-const TAG = '[ChainService]';
-
 @Injectable()
 export class PermitService {
-  private readonly logger = new Logger(PermitService.name);
-
   constructor(
     private readonly configService: ConfigService,
     private readonly web3EthersService: Web3EthersService,
   ) {}
 
+  private readonly TAG = '[PermitService]';
+  private readonly logger = new Logger(`${this.TAG}`);
+
   async requestMintPermit(requestMintPermitDto: RequestMintPermitDto) {
     const METHOD = '[requestMintPermit]';
-    this.logger.log(`${TAG} ${METHOD}`);
+    this.logger.log(`${METHOD}`);
 
     const { buyerAddress, sellerAddress } = requestMintPermitDto;
 
@@ -51,7 +50,7 @@ export class PermitService {
     buildPermitParamsDto.deadline = deadline.toString();
 
     // Build mint permit
-    const permit = await this.buildMintPermitParams(buildPermitParamsDto);
+    const permit: MintPermitResponseType = await this._buildMintPermitParams(buildPermitParamsDto);
 
     const wallet: Wallet = await this.web3EthersService.createWallet(
       this.configService.get('ethers-chain.smartContract.contractDeployer'),
@@ -95,10 +94,12 @@ export class PermitService {
    * @param {number} deadline
    * @return {object} The mint permit parameter object
    */
-
-  private async buildMintPermitParams(
+  private async _buildMintPermitParams(
     buildPermitParamsDto: BuildPermitParamsDto,
   ): Promise<MintPermitResponseType> {
+    const METHOD = '[_buildMintPermitParams]';
+    this.logger.log(`${METHOD}`);
+
     const {
       chainId,
       contractAddress,
