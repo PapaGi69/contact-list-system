@@ -1,3 +1,4 @@
+import { PermitModule } from './modules/permit/permit.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -7,7 +8,6 @@ import databaseConfig from './config/database.config';
 import kafkaConfig from './config/kafka.config';
 import chainConfig from './config/chain.config';
 import kmsConfig from './config/kms.config';
-import ethersChainConfig from './config/ethers-chain.config';
 import { TypeOrmConfigService } from './database/typeorm-config.service';
 import { HealthModule } from './modules/health/health.module';
 import { BurnModule } from './modules/burn/burn.module';
@@ -24,7 +24,7 @@ import { Web3EthersModule } from './providers/web3-ethers';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfig, appConfig, kafkaConfig, chainConfig, kmsConfig, ethersChainConfig],
+      load: [databaseConfig, appConfig, kafkaConfig, chainConfig, kmsConfig],
       envFilePath: ['.env'],
     }),
     TypeOrmModule.forRootAsync({
@@ -53,6 +53,7 @@ import { Web3EthersModule } from './providers/web3-ethers';
     TransferModule,
     StablecoinModule,
     TransactionModule,
+    PermitModule,
   ],
 })
 export class AppModule {}

@@ -34,26 +34,28 @@ export class PermitService {
 
     // BuildPermitParamsDto Config
     buildPermitParamsDto.chainId = this.configService.get(
-      'ethers-chain.smartContract.rpcProvider',
+      'chain.smartContract.rpcProvider',
     );
     buildPermitParamsDto.contractAddress = this.configService.get(
-      'ethers-chain.smartContract.smartContractAddress',
+      'chain.smartContract.smartContractAddress',
     );
     buildPermitParamsDto.domainName = this.configService.get(
-      'ethers-chain.smartContract.domainName',
+      'chain.smartContract.domainName',
     );
     buildPermitParamsDto.revision = this.configService.get(
-      'ethers-chain.smartContract.revision',
+      'chain.smartContract.revision',
     );
     buildPermitParamsDto.purchaser = buyerAddress;
     buildPermitParamsDto.seller = sellerAddress;
     buildPermitParamsDto.deadline = deadline.toString();
 
     // Build mint permit
-    const permit: MintPermitResponseType = await this._buildMintPermitParams(buildPermitParamsDto);
+    const permit: MintPermitResponseType = await this._buildMintPermitParams(
+      buildPermitParamsDto,
+    );
 
     const wallet: Wallet = await this.web3EthersService.createWallet(
-      this.configService.get('ethers-chain.smartContract.contractDeployer'),
+      this.configService.get('chain.smartContract.contractDeployer'),
     );
 
     try {
@@ -74,7 +76,7 @@ export class PermitService {
       this.logger.log(
         sign ===
           (await this.configService.get(
-            'ethers-chain.smartContract.deployerPublicKey',
+            'chain.smartContract.deployerPublicKey',
           )),
       );
     } catch (error) {

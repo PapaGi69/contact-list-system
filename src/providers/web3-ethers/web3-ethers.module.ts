@@ -1,15 +1,8 @@
 import { Module } from '@nestjs/common';
 
-import { 
-  ConfigModule, 
-  ConfigService 
-} from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
-import { 
-  EthersModule,
-  MUMBAI_NETWORK,
-  MATIC_NETWORK,
-} from 'nestjs-ethers';
+import { EthersModule, MUMBAI_NETWORK, MATIC_NETWORK } from 'nestjs-ethers';
 
 import { Web3EthersService } from './web3-ethers.service';
 
@@ -19,8 +12,11 @@ import { Web3EthersService } from './web3-ethers.service';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
         return {
-          network: configService.get('app.env') === 'prod' ? MATIC_NETWORK : MUMBAI_NETWORK,
-          infura: configService.get('ethers-chain.infura'),
+          network:
+            configService.get('app.env') === 'prod'
+              ? MATIC_NETWORK
+              : MUMBAI_NETWORK,
+          infura: configService.get('chain.infura'),
           useDefaultProvider: false,
         };
       },
