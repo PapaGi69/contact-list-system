@@ -32,9 +32,18 @@ export class PermitService {
 
     const buildPermitParamsDto = new BuildPermitParamsDto();
 
+    // Build mint permit
+    const permit: MintPermitResponseType = await this._buildMintPermitParams(
+      buildPermitParamsDto,
+    );
+
+    const wallet: Wallet = await this.web3EthersService.createWallet(
+      this.configService.get('chain.smartContract.contractDeployer'),
+    );
+
     // BuildPermitParamsDto Config
-    buildPermitParamsDto.chainId = this.configService.get(
-      'chain.smartContract.rpcProvider',
+    buildPermitParamsDto.chainId = await this.web3EthersService.getChainId(
+      wallet,
     );
     buildPermitParamsDto.contractAddress = this.configService.get(
       'chain.smartContract.smartContractAddress',
@@ -48,15 +57,6 @@ export class PermitService {
     buildPermitParamsDto.purchaser = buyerAddress;
     buildPermitParamsDto.seller = sellerAddress;
     buildPermitParamsDto.deadline = deadline.toString();
-
-    // Build mint permit
-    const permit: MintPermitResponseType = await this._buildMintPermitParams(
-      buildPermitParamsDto,
-    );
-
-    const wallet: Wallet = await this.web3EthersService.createWallet(
-      this.configService.get('chain.smartContract.contractDeployer'),
-    );
 
     try {
       // Permit signed by the contract deployer
@@ -79,6 +79,15 @@ export class PermitService {
             'chain.smartContract.deployerPublicKey',
           )),
       );
+
+      const address = buildPermitParamsDto.contractAddress;
+
+      return {
+        signature,
+        address,
+        deadline,
+        // Transaction status Success to discuss
+      };
     } catch (error) {
       this.logger.error(error);
     }

@@ -1,5 +1,5 @@
 export class BuildPermitParamsDto {
-  chainId: string;
+  chainId: number;
   contractAddress: string;
   domainName: string;
   revision: string;

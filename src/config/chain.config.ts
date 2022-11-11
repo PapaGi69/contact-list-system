@@ -15,7 +15,6 @@ export default registerAs('chain', () => ({
     projectSecret: process.env.INFURA_PROJECT_SECRET,
   },
   addresses: {
-    artifract: process.env.ARTIFRACT_CONTRACT_ADDRESS,
     phxContract: process.env.PHX_CONTRACT_ADDRESS,
     adminMinter: process.env.ADMIN_MINTER_KMS_ID,
     adminBurner: process.env.ADMIN_BURNER_KMS_ID,
