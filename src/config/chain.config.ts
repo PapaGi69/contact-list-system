@@ -28,7 +28,6 @@ export default registerAs('chain', () => ({
   smartContract: {
     domainName: process.env.SMART_CONTRACT_DOMAIN_NAME,
     smartContractAddress: process.env.SMART_CONTRACT_ADDRESS,
-    rpcProvider: process.env.SMART_CONTRACT_PROVIDER,
     revision: process.env.SMART_CONTRACT_REVISION,
     contractDeployer: process.env.SMART_CONTRACT_DEPLOYER,
     deployerPublicKey: process.env.SMART_CONTRACT_DEPLOYER_KEY,

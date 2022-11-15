@@ -37,6 +37,7 @@ export class PermitService {
       buildPermitParamsDto,
     );
 
+    // Contract deployer
     const wallet: Wallet = await this.web3EthersService.createWallet(
       this.configService.get('chain.smartContract.contractDeployer'),
     );
