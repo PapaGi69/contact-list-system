@@ -21,6 +21,12 @@ export class PermitService {
   private readonly TAG = '[PermitService]';
   private readonly logger = new Logger(`${this.TAG}`);
 
+  /**
+   * Request minting permit signature from smart contract
+   * @param {string} buyerAddress Buyer wallet address
+   * @param {string} sellerAddress Seller wallet address
+   * @return {string} The signature from smart contract for minting permit
+   */
   async requestMintPermit(requestMintPermitDto: RequestMintPermitDto) {
     const METHOD = '[requestMintPermit]';
     this.logger.log(`${METHOD}`);
@@ -30,12 +36,8 @@ export class PermitService {
     // Expiration of the mint permit
     const deadline = Date.now() + 300000;
 
+    // Assingning BuildPermitParamsDto
     const buildPermitParamsDto = new BuildPermitParamsDto();
-
-    // Build mint permit
-    const permit: MintPermitResponseType = await this._buildMintPermitParams(
-      buildPermitParamsDto,
-    );
 
     // Contract deployer
     const wallet: Wallet = await this.web3EthersService.createWallet(
@@ -59,6 +61,11 @@ export class PermitService {
     buildPermitParamsDto.seller = sellerAddress;
     buildPermitParamsDto.deadline = deadline.toString();
 
+    // Build mint permit
+    const permit: MintPermitResponseType = await this._buildMintPermitParams(
+      buildPermitParamsDto,
+    );
+
     try {
       // Permit signed by the contract deployer
       const signature = await this.web3EthersService.signTypeData(
@@ -74,6 +81,7 @@ export class PermitService {
         signature,
       );
 
+      // Check if sign is equal to wallet address of deployer
       this.logger.log(
         sign ===
           (await this.configService.get(
@@ -92,8 +100,6 @@ export class PermitService {
     } catch (error) {
       this.logger.error(error);
     }
-
-    this.web3EthersService.sendTransaction('signed');
   }
 
   /**

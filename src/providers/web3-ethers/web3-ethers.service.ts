@@ -57,6 +57,9 @@ export class Web3EthersService {
     this.logger.log(`${METHOD}`);
 
     const { domain, types, message } = permit;
+
+    this.logger.log(domain, message);
+
     return wallet._signTypedData(domain, types, message);
   }
 }
