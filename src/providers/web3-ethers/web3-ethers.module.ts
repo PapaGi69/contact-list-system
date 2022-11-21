@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
-import { EthersModule, MUMBAI_NETWORK, MATIC_NETWORK } from 'nestjs-ethers';
+import { EthersModule } from 'nestjs-ethers';
 
 import { Web3EthersService } from './web3-ethers.service';
 
@@ -14,8 +14,8 @@ import { Web3EthersService } from './web3-ethers.service';
         return {
           network:
             configService.get('app.env') === 'prod'
-              ? MATIC_NETWORK
-              : MUMBAI_NETWORK,
+              ? configService.get('chain.network.prod')
+              : configService.get('chain.network.dev'),
           infura: configService.get('chain.infura'),
           useDefaultProvider: false,
         };
