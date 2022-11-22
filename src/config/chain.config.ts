@@ -1,4 +1,3 @@
-import { MATIC_NETWORK, MUMBAI_NETWORK } from 'nestjs-ethers';
 import { registerAs } from '@nestjs/config';
 
 // thid-party service configurations go here
@@ -36,9 +35,6 @@ export default registerAs('chain', () => ({
     tokenName: process.env.NFT_TOKEN_NAME,
     blockchainExplorer: process.env.BLOCKCHAIN_EXPLORER_URL,
     platformFeePercentage: process.env.PLATFORM_FEE_PERCENTAGE,
-  },
-  network: {
-    dev: MUMBAI_NETWORK,
-    prod: MATIC_NETWORK,
+    network: process.env.SMART_CONTRRACT_NETWORK,
   },
 }));

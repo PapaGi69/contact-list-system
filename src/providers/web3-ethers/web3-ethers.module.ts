@@ -12,10 +12,7 @@ import { Web3EthersService } from './web3-ethers.service';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
         return {
-          network:
-            configService.get('app.env') === 'prod'
-              ? configService.get('chain.network.prod')
-              : configService.get('chain.network.dev'),
+          network: configService.get('chain.smartContract.network'),
           infura: configService.get('chain.infura'),
           useDefaultProvider: false,
         };
