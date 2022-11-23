@@ -1,3 +1,4 @@
+import { PermitModule } from './modules/permit/permit.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -11,11 +12,13 @@ import { TypeOrmConfigService } from './database/typeorm-config.service';
 import { HealthModule } from './modules/health/health.module';
 import { BurnModule } from './modules/burn/burn.module';
 import { MintModule } from './modules/mint/mint.module';
-import { Web3QuorumModule } from './providers/web3-quorum';
 import { TransferModule } from './modules/transfer/transfer.module';
 import { StablecoinModule } from './modules/stablecoin/stablecoin.module';
-import { AWSKMSModule } from './providers/aws-kms';
 import { TransactionModule } from './modules/transaction/transaction.module';
+
+import { Web3QuorumModule } from './providers/web3-quorum';
+import { AWSKMSModule } from './providers/aws-kms';
+import { Web3EthersModule } from './providers/web3-ethers';
 
 @Module({
   imports: [
@@ -43,12 +46,14 @@ import { TransactionModule } from './modules/transaction/transaction.module';
       useFactory: (configService: ConfigService) => configService.get('kms'),
       inject: [ConfigService],
     }),
+    Web3EthersModule,
     HealthModule,
     MintModule,
     BurnModule,
     TransferModule,
     StablecoinModule,
     TransactionModule,
+    PermitModule,
   ],
 })
 export class AppModule {}
