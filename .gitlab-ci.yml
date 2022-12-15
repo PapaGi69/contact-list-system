@@ -84,6 +84,6 @@ production:
   script:
     - .gitlab/02_deploy.sh
   rules:
-    - if: '$CI_COMMIT_REF_NAME == "production"'
+    - if: '$CI_COMMIT_REF_NAME == "master"'
   environment:
     name: production
