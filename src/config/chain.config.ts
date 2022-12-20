@@ -35,6 +35,6 @@ export default registerAs('chain', () => ({
     tokenName: process.env.NFT_TOKEN_NAME,
     blockchainExplorer: process.env.BLOCKCHAIN_EXPLORER_URL,
     platformFeePercentage: process.env.PLATFORM_FEE_PERCENTAGE,
-    network: process.env.SMART_CONTRRACT_NETWORK,
+    network: process.env.SMART_CONTRACT_NETWORK,
   },
 }));
