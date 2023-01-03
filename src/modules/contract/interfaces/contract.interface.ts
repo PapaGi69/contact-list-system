@@ -1,11 +1,11 @@
-export interface IContractKey {
+export interface IContract {
+  channelId: string;
+  deployer: string;
   address: string;
-}
-
-export interface IContract extends IContractKey {
   name: string;
   type: string;
   chainId: string;
   network: string;
+  revision: string;
   updatedAt?: Date;
 }

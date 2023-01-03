@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import { RpcException } from '@nestjs/microservices';
 import { Contract } from './entities/contract.entity';
 import { CreateContractDto } from './dto/create-contract.dto';
-import { IContract, IContractKey } from './interfaces/contract.interface';
+import { IContract } from './interfaces/contract.interface';
 
 const TAG = '[ContractService]';
 
@@ -27,47 +27,40 @@ export class ContractService {
     const METHOD = '[createContract]';
     this.logger.log(`${TAG} ${METHOD}`);
 
-    const { address } = createContractDto;
+    const { channelId } = createContractDto;
 
-    // get contractaddress that matches name
-    const contractAddress = await this.contractRepository.findOne({
-      where: { address },
+    // get channelId that matches name
+    const contract = await this.contractRepository.findOne({
+      where: { channelId },
     });
 
-    // throw bad request error if contractAddress already exists
-    if (contractAddress)
+    // throw bad request error if channelId already exists
+    if (contract)
       throw new RpcException(
-        `Contract with address "${address}" already exists`,
+        `Contract with channelId "${channelId}" already exists`,
       );
 
     return await this.contractRepository.create(createContractDto);
   }
 
   /**
-   * Get contract details that matched contract address
-   * @param {string} address Contract Address
+   * Get contract details that matched channelId
+   * @param {string} channelId Channel ID
    * @returns The contract details
    */
-  async getContractByAddress(address: string): Promise<any> {
+  async getContractById(channelId: string): Promise<any> {
     const METHOD = '[getContractByAddress]';
     this.logger.log(`${TAG} ${METHOD}`);
 
-    // throw if contract address does not exist
-    if (!address)
-      throw new RpcException(`Contract address ${address} does not exist`);
+    // throw if channelId does not exist
+    if (!channelId)
+      throw new RpcException(
+        `Contract with channelId "${channelId}" does not exist`,
+      );
 
     const contract = await this.contractRepository.findOne({
       where: {
-        address,
-      },
-      select: {
-        address: true,
-        name: true,
-        type: true,
-        chainId: true,
-        network: true,
-        createdAt: true,
-        updatedAt: true,
+        channelId,
       },
     });
 
@@ -75,9 +68,8 @@ export class ContractService {
   }
 
   /**
-   * Get contract details that matched contract address
-   * @param {string} address Contract Address
-   * @returns The contract details
+   * Get all contracts
+   * @returns All contracts
    */
   async getContracts(): Promise<any> {
     const METHOD = '[getContracts]';
@@ -89,32 +81,32 @@ export class ContractService {
   }
 
   /**
-   * Delete contract that matched contract address
-   * @param {string} address Contract Address
+   * Delete contract that matched channelId
+   * @param {string} channelId Channel ID
    * @returns Delete status
    */
-  async deleteContract(address: string) {
+  async deleteContract(channelId: string) {
     const METHOD = '[deleteContract]';
     this.logger.log(`${TAG} ${METHOD}`);
 
-    // get contractaddress that matches name
-    const contractAddress = await this.contractRepository.findOne({
-      where: { address },
+    // get channelId that matches name
+    const contract = await this.contractRepository.findOne({
+      where: { channelId },
     });
 
     // throw bad request error if contractAddress does not exist
-    if (!contractAddress)
+    if (!contract)
       throw new RpcException(
-        `Contract with address "${address}" does not exist`,
+        `Contract with channelId "${channelId}" does not exist`,
       );
 
     // delete
-    return await this.contractRepository.delete(address);
+    return await this.contractRepository.delete(channelId);
   }
 
   /**
-   * Update smart contract that matched contract address with new object parameters
-   * @param {string} address Smart contract address
+   * Update smart contract that matched channelId with new object parameters
+   * @param {string} channelId Channel ID
    * @param createContractDto Update contract using create contract dto as object parameter
    * @returns The updated contract
    */
@@ -122,25 +114,37 @@ export class ContractService {
     const METHOD = '[updateContract]';
     this.logger.log(`${TAG} ${METHOD}`);
 
-    const { address, name, type, chainId, network } = updateContractDto;
-
-    // get contract address that matches address
-    const contract = await this.contractRepository.findOne({
-      where: { address },
-    });
-
-    // throw bad request error if contractAddress does not exist
-    if (!contract)
-      throw new RpcException(
-        `Contract with address "${address}" does not exist`,
-      );
-
-    const updateContractModel: IContract = {
+    const {
+      channelId,
+      deployer,
       address,
       name,
       type,
       chainId,
       network,
+      revision,
+    } = updateContractDto;
+
+    // get contract that matches channelId
+    const contract = await this.contractRepository.findOne({
+      where: { channelId },
+    });
+
+    // throw bad request error if channelId does not exist
+    if (!contract)
+      throw new RpcException(
+        `Contract with channelId "${channelId}" does not exist`,
+      );
+
+    const updateContractModel: IContract = {
+      channelId,
+      deployer,
+      address,
+      name,
+      type,
+      chainId,
+      network,
+      revision,
     };
 
     return await this.contractRepository.save(updateContractModel);

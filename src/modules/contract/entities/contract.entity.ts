@@ -2,13 +2,22 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
-@Entity({ name: 'contract' })
+@Entity({ name: 'smart_contract' })
 export class Contract {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn('uuid')
+  id?: string;
+
+  @Column()
+  channelId: string;
+
+  @Column()
+  deployer: string;
+
+  @Column()
   address: string;
 
   @Column()
@@ -22,6 +31,9 @@ export class Contract {
 
   @Column()
   network: string;
+
+  @Column()
+  revision: string;
 
   @CreateDateColumn() // Date will be coming from orchestrator
   createdAt?: Date;

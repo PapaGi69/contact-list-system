@@ -27,14 +27,11 @@ export class ContractController {
     );
     const { address } = data;
 
-    return await this.contractService.getContractByAddress(address);
+    return await this.contractService.getContractById(address);
   }
 
   @MessagePattern('getall.contract')
-  async getContracts(
-    @Payload() data: CreateContractDto,
-    @Ctx() context: KafkaContext,
-  ) {
+  async getContracts(@Ctx() context: KafkaContext) {
     const METHOD = '[getContracts]';
     this.logger.log(
       `${TAG} ${METHOD} Incoming data from ${context.getTopic()}`,
