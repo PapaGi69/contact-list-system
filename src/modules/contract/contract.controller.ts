@@ -44,7 +44,7 @@ export class ContractController {
   async createContract(
     @Payload() data: CreateContractDto,
     @Ctx() context: KafkaContext,
-  ) {
+  ): Promise<any> {
     const METHOD = '[createContract]';
     this.logger.log(
       `${TAG} ${METHOD} Incoming data from ${context.getTopic()}`,

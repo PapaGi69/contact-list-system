@@ -19,7 +19,6 @@ export class Web3EthersService {
     private readonly ethersProvider: BaseProvider,
     @InjectSignerProvider()
     private readonly ethersSigner: EthersSigner,
-    private readonly configService: ConfigService,
   ) {}
 
   private readonly TAG = '[Web3EthersService]';

@@ -40,7 +40,11 @@ export class ContractService {
         `Contract with channelId "${channelId}" already exists`,
       );
 
-    return await this.contractRepository.create(createContractDto);
+    const newContract: Contract = {
+      ...createContractDto,
+    };
+
+    return await this.contractRepository.save(newContract);
   }
 
   /**
@@ -114,16 +118,7 @@ export class ContractService {
     const METHOD = '[updateContract]';
     this.logger.log(`${TAG} ${METHOD}`);
 
-    const {
-      channelId,
-      deployer,
-      address,
-      name,
-      type,
-      chainId,
-      network,
-      revision,
-    } = updateContractDto;
+    const { channelId } = updateContractDto;
 
     // get contract that matches channelId
     const contract = await this.contractRepository.findOne({
@@ -137,14 +132,7 @@ export class ContractService {
       );
 
     const updateContractModel: IContract = {
-      channelId,
-      deployer,
-      address,
-      name,
-      type,
-      chainId,
-      network,
-      revision,
+      ...updateContractDto,
     };
 
     return await this.contractRepository.save(updateContractModel);
