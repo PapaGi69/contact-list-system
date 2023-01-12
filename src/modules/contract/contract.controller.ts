@@ -25,9 +25,9 @@ export class ContractController {
     this.logger.log(
       `${TAG} ${METHOD} Incoming data from ${context.getTopic()}`,
     );
-    const { address } = data;
+    const { channelId } = data;
 
-    return await this.contractService.getContractById(address);
+    return await this.contractService.getContractById(channelId);
   }
 
   @MessagePattern('getall.contract')

@@ -35,11 +35,11 @@ export class Contract {
   @Column()
   revision: string;
 
-  @Column({ default: false })
-  archived?: boolean;
+  @Column({ default: 'false' })
+  archived?: string;
 
-  @Column()
-  archivedAt?: Date;
+  @Column({ nullable: true })
+  archivedAt?: Date | null;
 
   @CreateDateColumn() // Date will be coming from orchestrator
   createdAt?: Date;

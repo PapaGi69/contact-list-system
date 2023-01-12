@@ -7,7 +7,7 @@ export class CreateContractDto {
   chainId: string;
   network: string;
   revision: string;
-  archived?: boolean;
+  archived?: string;
   archivedAt?: Date;
   createdAt?: Date;
   updatedAt?: Date;

@@ -27,19 +27,6 @@ export class ContractService {
     const METHOD = '[createContract]';
     this.logger.log(`${TAG} ${METHOD}`);
 
-    const { channelId } = createContractDto;
-
-    // get channelId that matches name
-    const contract = await this.contractRepository.findOne({
-      where: { channelId },
-    });
-
-    // throw bad request error if channelId already exists
-    if (contract)
-      throw new RpcException(
-        `Contract with channelId "${channelId}" already exists`,
-      );
-
     const newContract: Contract = {
       ...createContractDto,
     };
@@ -56,15 +43,10 @@ export class ContractService {
     const METHOD = '[getContractByAddress]';
     this.logger.log(`${TAG} ${METHOD}`);
 
-    // throw if channelId does not exist
-    if (!channelId)
-      throw new RpcException(
-        `Contract with channelId "${channelId}" does not exist`,
-      );
-
     const contract = await this.contractRepository.findOne({
       where: {
         channelId,
+        archived: 'false',
       },
     });
 
@@ -79,13 +61,15 @@ export class ContractService {
     const METHOD = '[getContracts]';
     this.logger.log(`${TAG} ${METHOD}`);
 
-    const contract = await this.contractRepository.find();
-
-    return { contract };
+    return await this.contractRepository.find({
+      where: {
+        archived: 'false',
+      },
+    });
   }
 
   /**
-   * Delete contract that matched channelId
+   * Soft delete contract that matched channelId
    * @param {string} channelId Channel ID
    * @returns Delete status
    */
@@ -98,19 +82,16 @@ export class ContractService {
       where: { channelId },
     });
 
-    // throw bad request error if contractAddress does not exist
-    if (!contract)
-      throw new RpcException(
-        `Contract with channelId "${channelId}" does not exist`,
-      );
-
-    // delete
-    return await this.contractRepository.delete(channelId);
+    // update the archived and archived at values
+    await this.contractRepository.save({
+      ...contract,
+      archived: 'true',
+      archivedAt: new Date(),
+    });
   }
 
   /**
    * Update smart contract that matched channelId with new object parameters
-   * @param {string} channelId Channel ID
    * @param createContractDto Update contract using create contract dto as object parameter
    * @returns The updated contract
    */
@@ -125,16 +106,15 @@ export class ContractService {
       where: { channelId },
     });
 
-    // throw bad request error if channelId does not exist
+    // throw bad request error if co does not exist
     if (!contract)
       throw new RpcException(
         `Contract with channelId "${channelId}" does not exist`,
       );
 
-    const updateContractModel: IContract = {
+    return await this.contractRepository.save({
+      ...contract,
       ...updateContractDto,
-    };
-
-    return await this.contractRepository.save(updateContractModel);
+    });
   }
 }
