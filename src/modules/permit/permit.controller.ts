@@ -8,7 +8,7 @@ import {
 } from '@nestjs/microservices';
 import { PermitService } from './permit.service';
 
-const TAG = '[StablecoinController]';
+const TAG = '[PermitController]';
 
 @Controller()
 export class PermitController {

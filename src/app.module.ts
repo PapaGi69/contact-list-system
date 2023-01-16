@@ -1,3 +1,4 @@
+import { ContractModule } from './modules/contract/contract.module';
 import { PermitModule } from './modules/permit/permit.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -53,6 +54,7 @@ import { Web3EthersModule } from './providers/web3-ethers';
     TransferModule,
     StablecoinModule,
     TransactionModule,
+    ContractModule,
     PermitModule,
   ],
 })
