@@ -10,10 +10,16 @@ import { MintPermitType } from './type/mint-permit.type';
 import { MintPermitResponseType } from './type/mint-permit-response.type';
 import { Wallet } from 'nestjs-ethers';
 import { ethers } from 'ethers';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Contract } from '../contract/entities/contract.entity';
+import { Repository } from 'typeorm';
+import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class PermitService {
   constructor(
+    @InjectRepository(Contract)
+    private readonly contractRepository: Repository<Contract>,
     private readonly configService: ConfigService,
     private readonly web3EthersService: Web3EthersService,
   ) {}
@@ -31,7 +37,23 @@ export class PermitService {
     const METHOD = '[requestMintPermit]';
     this.logger.log(`${METHOD}`);
 
-    const { buyerAddress, sellerAddress } = requestMintPermitDto;
+    const { channelId, buyerAddress, sellerAddress } = requestMintPermitDto;
+
+    const contract = await this.contractRepository.findOne({
+      where: {
+        channelId,
+        archived: 'false',
+      },
+    });
+
+    // throw bad request error if contract does not exist
+    if (!contract)
+      throw new RpcException(
+        `Contract with channelId "${channelId}" does not exist`,
+      );
+
+    // deconstruct contract
+    const { deployer, address, name, revision } = contract;
 
     // Expiration of the mint permit
     const deadline = Date.now() + 300000;
@@ -40,23 +62,15 @@ export class PermitService {
     const buildPermitParamsDto = new BuildPermitParamsDto();
 
     // Contract deployer
-    const wallet: Wallet = await this.web3EthersService.createWallet(
-      this.configService.get('chain.smartContract.contractDeployer'),
-    );
+    const wallet: Wallet = await this.web3EthersService.createWallet(deployer);
 
     // BuildPermitParamsDto Config
     buildPermitParamsDto.chainId = await this.web3EthersService.getChainId(
       wallet,
     );
-    buildPermitParamsDto.contractAddress = this.configService.get(
-      'chain.smartContract.smartContractAddress',
-    );
-    buildPermitParamsDto.domainName = this.configService.get(
-      'chain.smartContract.domainName',
-    );
-    buildPermitParamsDto.revision = this.configService.get(
-      'chain.smartContract.revision',
-    );
+    buildPermitParamsDto.contractAddress = address;
+    buildPermitParamsDto.domainName = name;
+    buildPermitParamsDto.revision = revision;
     buildPermitParamsDto.purchaser = buyerAddress;
     buildPermitParamsDto.seller = sellerAddress;
     buildPermitParamsDto.deadline = deadline.toString();

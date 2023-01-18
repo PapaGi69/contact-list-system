@@ -5,7 +5,6 @@ import { Repository } from 'typeorm';
 import { RpcException } from '@nestjs/microservices';
 import { Contract } from './entities/contract.entity';
 import { CreateContractDto } from './dto/create-contract.dto';
-import { IContract } from './interfaces/contract.interface';
 
 const TAG = '[ContractService]';
 
@@ -106,7 +105,7 @@ export class ContractService {
       where: { channelId },
     });
 
-    // throw bad request error if co does not exist
+    // throw bad request error if contract does not exist
     if (!contract)
       throw new RpcException(
         `Contract with channelId "${channelId}" does not exist`,

@@ -30,7 +30,7 @@ export default registerAs('chain', () => ({
     smartContractAddress: process.env.SMART_CONTRACT_ADDRESS,
     revision: process.env.SMART_CONTRACT_REVISION,
     contractDeployer: process.env.SMART_CONTRACT_DEPLOYER,
-    deployerPublicKey: process.env.SMART_CONTRACT_DEPLOYER_KEY,
+    deployerPublicKey: process.env.SMART_CONTRACT_PUBLIC_KEY,
     tokenType: process.env.NFT_TOKEN_TYPE,
     tokenName: process.env.NFT_TOKEN_NAME,
     blockchainExplorer: process.env.BLOCKCHAIN_EXPLORER_URL,
