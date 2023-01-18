@@ -1,7 +1,9 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class smartContractTable1673416488655 implements MigrationInterface {
-  name = 'smartContractTable1673416488655';
+export class createTableSmartContract1674034162960
+  implements MigrationInterface
+{
+  name = 'createTableSmartContract1674034162960';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
