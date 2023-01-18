@@ -12,7 +12,6 @@ import { ethers } from 'ethers';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Contract } from '../contract/entities/contract.entity';
 import { Repository } from 'typeorm';
-import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class PermitService {
@@ -43,12 +42,6 @@ export class PermitService {
         archived: 'false',
       },
     });
-
-    // throw bad request error if contract does not exist
-    if (!contract)
-      throw new RpcException(
-        `Contract with channelId "${channelId}" does not exist`,
-      );
 
     // deconstruct contract
     const { deployer, publicKey, address, name, revision } = contract;
