@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 
 import { Web3EthersService } from 'src/providers/web3-ethers';
 
@@ -20,7 +19,6 @@ export class PermitService {
   constructor(
     @InjectRepository(Contract)
     private readonly contractRepository: Repository<Contract>,
-    private readonly configService: ConfigService,
     private readonly web3EthersService: Web3EthersService,
   ) {}
 
@@ -53,7 +51,7 @@ export class PermitService {
       );
 
     // deconstruct contract
-    const { deployer, address, name, revision } = contract;
+    const { deployer, publicKey, address, name, revision } = contract;
 
     // Expiration of the mint permit
     const deadline = Date.now() + 300000;
@@ -96,12 +94,7 @@ export class PermitService {
       );
 
       // Check if sign is equal to wallet address of deployer
-      this.logger.log(
-        sign ===
-          (await this.configService.get(
-            'chain.smartContract.deployerPublicKey',
-          )),
-      );
+      this.logger.log(sign === publicKey);
 
       const address = buildPermitParamsDto.contractAddress;
 
