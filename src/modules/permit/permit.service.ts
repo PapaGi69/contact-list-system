@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 
 import { Web3EthersService } from 'src/providers/web3-ethers';
 
@@ -10,11 +9,15 @@ import { MintPermitType } from './type/mint-permit.type';
 import { MintPermitResponseType } from './type/mint-permit-response.type';
 import { Wallet } from 'nestjs-ethers';
 import { ethers } from 'ethers';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Contract } from '../contract/entities/contract.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class PermitService {
   constructor(
-    private readonly configService: ConfigService,
+    @InjectRepository(Contract)
+    private readonly contractRepository: Repository<Contract>,
     private readonly web3EthersService: Web3EthersService,
   ) {}
 
@@ -31,7 +34,17 @@ export class PermitService {
     const METHOD = '[requestMintPermit]';
     this.logger.log(`${METHOD}`);
 
-    const { buyerAddress, sellerAddress } = requestMintPermitDto;
+    const { channelId, buyerAddress, sellerAddress } = requestMintPermitDto;
+
+    const contract = await this.contractRepository.findOne({
+      where: {
+        channelId,
+        archived: 'false',
+      },
+    });
+
+    // deconstruct contract
+    const { deployer, publicKey, address, name, revision } = contract;
 
     // Expiration of the mint permit
     const deadline = Date.now() + 300000;
@@ -40,23 +53,15 @@ export class PermitService {
     const buildPermitParamsDto = new BuildPermitParamsDto();
 
     // Contract deployer
-    const wallet: Wallet = await this.web3EthersService.createWallet(
-      this.configService.get('chain.smartContract.contractDeployer'),
-    );
+    const wallet: Wallet = await this.web3EthersService.createWallet(deployer);
 
     // BuildPermitParamsDto Config
     buildPermitParamsDto.chainId = await this.web3EthersService.getChainId(
       wallet,
     );
-    buildPermitParamsDto.contractAddress = this.configService.get(
-      'chain.smartContract.smartContractAddress',
-    );
-    buildPermitParamsDto.domainName = this.configService.get(
-      'chain.smartContract.domainName',
-    );
-    buildPermitParamsDto.revision = this.configService.get(
-      'chain.smartContract.revision',
-    );
+    buildPermitParamsDto.contractAddress = address;
+    buildPermitParamsDto.domainName = name;
+    buildPermitParamsDto.revision = revision;
     buildPermitParamsDto.purchaser = buyerAddress;
     buildPermitParamsDto.seller = sellerAddress;
     buildPermitParamsDto.deadline = deadline.toString();
@@ -82,12 +87,7 @@ export class PermitService {
       );
 
       // Check if sign is equal to wallet address of deployer
-      this.logger.log(
-        sign ===
-          (await this.configService.get(
-            'chain.smartContract.deployerPublicKey',
-          )),
-      );
+      this.logger.log(sign === publicKey);
 
       const address = buildPermitParamsDto.contractAddress;
 

@@ -18,6 +18,9 @@ export class Contract {
   deployer: string;
 
   @Column()
+  publicKey: string;
+
+  @Column()
   address: string;
 
   @Column()

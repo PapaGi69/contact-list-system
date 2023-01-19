@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 
 import {
   InjectEthersProvider,
@@ -36,7 +35,6 @@ export class Web3EthersService {
   async createWallet(contractDeployer: any): Promise<Wallet> {
     const METHOD = '[createWallet]';
     this.logger.log(`${METHOD}`);
-    this.logger.log(contractDeployer);
 
     return this.ethersSigner.createWallet(contractDeployer);
   }
@@ -56,8 +54,6 @@ export class Web3EthersService {
     this.logger.log(`${METHOD}`);
 
     const { domain, types, message } = permit;
-
-    this.logger.log(domain, message);
 
     return wallet._signTypedData(domain, types, message);
   }

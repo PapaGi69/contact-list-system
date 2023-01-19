@@ -5,7 +5,6 @@ import { Repository } from 'typeorm';
 import { RpcException } from '@nestjs/microservices';
 import { Contract } from './entities/contract.entity';
 import { CreateContractDto } from './dto/create-contract.dto';
-import { IContract } from './interfaces/contract.interface';
 
 const TAG = '[ContractService]';
 
@@ -48,6 +47,19 @@ export class ContractService {
         channelId,
         archived: 'false',
       },
+      select: {
+        id: true,
+        channelId: true,
+        publicKey: true,
+        address: true,
+        name: true,
+        type: true,
+        chainId: true,
+        network: true,
+        revision: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
 
     return { ...contract };
@@ -65,6 +77,19 @@ export class ContractService {
       where: {
         archived: 'false',
       },
+      select: {
+        id: true,
+        channelId: true,
+        publicKey: true,
+        address: true,
+        name: true,
+        type: true,
+        chainId: true,
+        network: true,
+        revision: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
   }
 
@@ -79,7 +104,10 @@ export class ContractService {
 
     // get channelId that matches name
     const contract = await this.contractRepository.findOne({
-      where: { channelId },
+      where: {
+        channelId,
+        archived: 'false',
+      },
     });
 
     // update the archived and archived at values
@@ -103,10 +131,13 @@ export class ContractService {
 
     // get contract that matches channelId
     const contract = await this.contractRepository.findOne({
-      where: { channelId },
+      where: {
+        channelId,
+        archived: 'false',
+      },
     });
 
-    // throw bad request error if co does not exist
+    // throw bad request error if contract does not exist
     if (!contract)
       throw new RpcException(
         `Contract with channelId "${channelId}" does not exist`,

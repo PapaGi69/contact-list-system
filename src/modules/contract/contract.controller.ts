@@ -62,9 +62,9 @@ export class ContractController {
     this.logger.log(
       `${TAG} ${METHOD} Incoming data from ${context.getTopic()}`,
     );
-    const { address } = data;
+    const { channelId } = data;
 
-    return await this.contractService.deleteContract(address);
+    return await this.contractService.deleteContract(channelId);
   }
 
   @MessagePattern('update.contract')

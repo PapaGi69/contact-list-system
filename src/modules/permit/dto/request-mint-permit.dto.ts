@@ -1,5 +1,5 @@
 export class RequestMintPermitDto {
-  chainId: string;
+  channelId: string;
   buyerAddress: string;
   sellerAddress: string;
 }

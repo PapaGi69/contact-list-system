@@ -1,6 +1,7 @@
 export class CreateContractDto {
   channelId: string;
   deployer: string;
+  publicKey: string;
   address: string;
   name: string;
   type: string;
