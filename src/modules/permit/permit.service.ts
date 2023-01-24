@@ -12,6 +12,7 @@ import { ethers } from 'ethers';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Contract } from '../contract/entities/contract.entity';
 import { Repository } from 'typeorm';
+import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class PermitService {
@@ -33,6 +34,9 @@ export class PermitService {
   async requestMintPermit(requestMintPermitDto: RequestMintPermitDto) {
     const METHOD = '[requestMintPermit]';
     this.logger.log(`${METHOD}`);
+
+    // throw bad request error if contract does not exist
+    if (!requestMintPermitDto) throw new RpcException(`Contract is null`);
 
     const { channelId, buyerAddress, sellerAddress } = requestMintPermitDto;
 

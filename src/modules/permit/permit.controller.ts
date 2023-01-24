@@ -1,5 +1,5 @@
 import { RequestMintPermitDto } from './dto/request-mint-permit.dto';
-import { Controller, Logger } from '@nestjs/common';
+import { Controller, Logger, UseFilters } from '@nestjs/common';
 import {
   Ctx,
   KafkaContext,
@@ -7,10 +7,12 @@ import {
   Payload,
 } from '@nestjs/microservices';
 import { PermitService } from './permit.service';
+import { InternalServerError } from 'src/filters/internal-error.filter';
 
 const TAG = '[PermitController]';
 
 @Controller()
+@UseFilters(InternalServerError)
 export class PermitController {
   private readonly logger = new Logger(PermitController.name);
 

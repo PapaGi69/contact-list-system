@@ -1,8 +1,7 @@
 import { UpdateContractDto } from './dto/update-contract.dto';
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { RpcException } from '@nestjs/microservices';
 import { Contract } from './entities/contract.entity';
 import { CreateContractDto } from './dto/create-contract.dto';
 
@@ -26,6 +25,21 @@ export class ContractService {
     const METHOD = '[createContract]';
     this.logger.log(`${TAG} ${METHOD}`);
 
+    const { channelId } = createContractDto;
+
+    const contract = await this.contractRepository.findOne({
+      where: {
+        channelId,
+        archived: 'false',
+      },
+    });
+
+    // throw bad request error if contract does not exist
+    if (contract)
+      throw new BadRequestException(
+        `Contract with channelId "${createContractDto.channelId}" already exists`,
+      );
+
     const newContract: Contract = {
       ...createContractDto,
     };
@@ -38,8 +52,8 @@ export class ContractService {
    * @param {string} channelId Channel ID
    * @returns The contract details
    */
-  async getContractById(channelId: string): Promise<any> {
-    const METHOD = '[getContractByAddress]';
+  async getContractByChannelId(channelId: string): Promise<any> {
+    const METHOD = '[getContractByChannelId]';
     this.logger.log(`${TAG} ${METHOD}`);
 
     const contract = await this.contractRepository.findOne({
@@ -110,8 +124,14 @@ export class ContractService {
       },
     });
 
+    // throw bad request error if contract does not exist
+    if (!contract)
+      throw new BadRequestException(
+        `Contract with channelId "${channelId}" does not exists`,
+      );
+
     // update the archived and archived at values
-    await this.contractRepository.save({
+    return await this.contractRepository.save({
       ...contract,
       archived: 'true',
       archivedAt: new Date(),
@@ -139,8 +159,8 @@ export class ContractService {
 
     // throw bad request error if contract does not exist
     if (!contract)
-      throw new RpcException(
-        `Contract with channelId "${channelId}" does not exist`,
+      throw new BadRequestException(
+        `Contract with channelId "${channelId}" does not exists`,
       );
 
     return await this.contractRepository.save({

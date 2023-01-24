@@ -1,5 +1,5 @@
 import { CreateContractDto } from './dto/create-contract.dto';
-import { Controller, Logger } from '@nestjs/common';
+import { Controller, Logger, UseFilters } from '@nestjs/common';
 import {
   Ctx,
   KafkaContext,
@@ -7,27 +7,29 @@ import {
   Payload,
 } from '@nestjs/microservices';
 import { ContractService } from './contract.service';
+import { InternalServerError } from 'src/filters/internal-error.filter';
 
 const TAG = '[ContractController]';
 
 @Controller()
+@UseFilters(InternalServerError)
 export class ContractController {
   private readonly logger = new Logger(ContractController.name);
 
   constructor(private readonly contractService: ContractService) {}
 
   @MessagePattern('get.contract')
-  async getContractByAddress(
+  async getContractByChannelId(
     @Payload() data: CreateContractDto,
     @Ctx() context: KafkaContext,
   ) {
-    const METHOD = '[getContractByAddress]';
+    const METHOD = '[getContractByChannelId]';
     this.logger.log(
       `${TAG} ${METHOD} Incoming data from ${context.getTopic()}`,
     );
     const { channelId } = data;
 
-    return await this.contractService.getContractById(channelId);
+    return await this.contractService.getContractByChannelId(channelId);
   }
 
   @MessagePattern('getall.contract')

@@ -4,10 +4,10 @@ import { NestApplication, NestFactory } from '@nestjs/core';
 import { Transport } from '@nestjs/microservices';
 import { useContainer } from 'class-validator';
 import { AppModule } from './app.module';
-import { HttpExceptionFilter } from './filters/http-exception.filter';
 import { LoggingInterceptor } from './interceptors/logging.interceptor';
 import { ResponseInterceptor } from './interceptors/response.interceptor';
 import { setupSwagger } from './swagger';
+import { InternalServerError } from './filters/internal-error.filter';
 
 async function bootstrap() {
   const app: NestApplication = await NestFactory.create(AppModule);
@@ -39,7 +39,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new LoggingInterceptor());
 
   // setup global exception filter for logging
-  app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalFilters(new InternalServerError());
 
   // For the downstream services, we should create an endpoint
   // for healthcheck; a hybrid microservice consumer
